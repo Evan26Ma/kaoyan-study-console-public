@@ -1,0 +1,34 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Runtime logs and process files
+*.log
+*.pid
+*.pid.lock
+npm-debug.log*
+
+# Private runtime state, backups, generated notes, and credentials
+data/
+
+# Locally imported study content. The repository ships only an anonymous example.
+/manual45-content/
+manual45-proofread*.json
+
+# Downloaded third-party assets and future runtime caches
+.cache/
+tmp/
+temp/
+
+# Local deployment and editor backups
+deploy-backups/
+*.before-*
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~

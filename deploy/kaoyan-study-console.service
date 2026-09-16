@@ -1,0 +1,19 @@
+[Unit]
+Description=Kaoyan Study Console
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/kaoyan-study-console
+ExecStart=/usr/bin/node /opt/kaoyan-study-console/server.js
+Restart=on-failure
+RestartSec=3
+KillSignal=SIGTERM
+TimeoutStopSec=20
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>考研计划工作台</title>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [["$", "$"], ["\\(", "\\)"]], displayMath: [["$$", "$$"], ["\\[", "\\]"]] },
+      startup: { typeset: false }
+    };
+  </script>
+  <script defer src="vendor/mathjax/tex-svg.js"></script>
+  <style>
+    :root {
+      --canvas: #f7f9fc;
+      --paper: #ffffff;
+      --ink: #172033;
+      --muted: #65728a;
+      --line: #dce4ef;
+      --navy: #285a9b;
+      --teal: #087e75;
+      --teal-soft: #e8f7f5;
+      --blue-soft: #edf5ff;
+      --coral: #c85262;
+      --coral-soft: #fff1f3;
+      --amber: #a96712;
+      --amber-soft: #fff6e8;
+      --green: #217b55;
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--canvas); }
+    body { margin: 0; min-width: 320px; background: var(--canvas); color: var(--ink); font: 16px/1.5 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(40,90,155,.28); outline-offset: 2px; }
+    button:disabled { cursor: not-allowed; opacity: .5; }
+    .skip-link { position: fixed; z-index: 100; top: 8px; left: 8px; transform: translateY(-160%); padding: 9px 12px; border-radius: 6px; background: var(--navy); color: #fff; text-decoration: none; }
+    .skip-link:focus { transform: translateY(0); }
+
+    .masthead { display: grid; grid-template-columns: minmax(230px, 1fr) auto; align-items: center; gap: 20px; min-height: 82px; padding: 14px max(22px, calc((100vw - 1360px) / 2)); border-bottom: 1px solid var(--line); background: rgba(255,255,255,.92); }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 7px; background: var(--navy); color: #fff; font-weight: 800; letter-spacing: .04em; }
+    .brand-copy { min-width: 0; }
+    .brand-copy strong { display: block; letter-spacing: .04em; }
+    .brand-copy span { display: block; overflow: hidden; color: var(--muted); font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+    .mast-actions { display: flex; align-items: center; gap: 8px; }
+    .read-state { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); font-size: .78rem; }
+    .quiet-btn, .primary-btn, .danger-btn { min-height: 40px; padding: 0 13px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); }
+    .quiet-btn:hover { border-color: #adc5e2; background: var(--blue-soft); color: var(--navy); }
+    .primary-btn { border-color: var(--teal); background: var(--teal); color: #fff; }
+    .primary-btn:hover { background: #05675f; }
+    .danger-btn { border-color: #ebbfc7; color: var(--coral); }
+
+    .worknav { display: flex; gap: 3px; width: min(1360px, calc(100% - 44px)); margin: 0 auto; padding: 12px 0; overflow-x: auto; scrollbar-width: none; }
+    .worknav::-webkit-scrollbar { display: none; }
+    .nav-tab { flex: 0 0 auto; min-height: 38px; padding: 0 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); font-size: .86rem; }
+    .nav-tab:hover { color: var(--ink); background: #eef2f8; }
+    .nav-tab[aria-selected="true"] { border-bottom-color: var(--teal); color: var(--teal); font-weight: 750; }
+    .nav-count { display: inline-grid; min-width: 18px; margin-left: 5px; place-items: center; border-radius: 999px; background: #edf1f7; color: #68758b; font-size: .68rem; }
+
+    main { width: min(1360px, calc(100% - 44px)); margin: 0 auto; padding: 18px 0 70px; }
+    .view-head { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin: 8px 0 18px; }
+    .eyebrow { margin: 0 0 4px; color: var(--navy); font-size: .7rem; font-weight: 800; letter-spacing: .13em; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 4px; font-size: 1.7rem; line-height: 1.2; }
+    h2 { margin-bottom: 0; font-size: 1.04rem; }
+    .view-head p:last-child { margin: 0; color: var(--muted); font-size: .88rem; }
+
+    .paper { border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); }
+    .hero-grid { display: grid; grid-template-columns: minmax(300px, 1.2fr) repeat(3, minmax(150px,.55fr)); border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+    .hero-focus, .hero-stat { min-height: 138px; padding: 22px; border-right: 1px solid var(--line); }
+    .hero-focus { background: var(--blue-soft); }
+    .hero-focus small, .hero-stat small { display: block; color: var(--muted); font-size: .76rem; }
+    .hero-focus strong { display: block; margin: 7px 0; font-size: 1.32rem; line-height: 1.35; }
+    .hero-stat:last-child { border-right: 0; }
+    .hero-stat b { display: block; margin: 7px 0 2px; font-size: 1.62rem; line-height: 1; }
+    .hero-stat.teal b { color: var(--teal); }
+    .hero-stat.coral b { color: var(--coral); }
+    .hero-stat.navy b { color: var(--navy); }
+    .home-grid { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(300px,.75fr); gap: 16px; margin-top: 16px; }
+    .section { padding: 18px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+    .section-head span { color: var(--muted); font-size: .8rem; }
+    .focus-list, .mini-list { display: grid; gap: 0; }
+    .focus-row, .mini-row { display: grid; grid-template-columns: 34px minmax(0,1fr) auto; align-items: center; gap: 10px; min-height: 65px; border-top: 1px solid var(--line); }
+    .focus-row:first-child, .mini-row:first-child { border-top: 0; }
+    .row-index { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--teal-soft); color: var(--teal); font-size: .75rem; font-weight: 800; }
+    .row-title { min-width: 0; overflow: hidden; font-size: .91rem; text-overflow: ellipsis; white-space: nowrap; }
+    .row-meta { color: var(--muted); font-size: .75rem; }
+    .row-badge { padding: 3px 7px; border-radius: 999px; background: var(--amber-soft); color: var(--amber); font-size: .72rem; white-space: nowrap; }
+
+    .wrong-layout { display: grid; grid-template-columns: minmax(330px,.8fr) minmax(420px,1.2fr); gap: 16px; align-items: start; }
+    .library-panel { overflow: hidden; }
+    .library-tools { display: grid; grid-template-columns: minmax(0,1fr) 126px; gap: 8px; padding: 14px; border-bottom: 1px solid var(--line); }
+    .library-tools input, .library-tools select, .token-input { min-width: 0; min-height: 40px; padding: 0 10px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: var(--ink); }
+    .tool-extra { display: flex; gap: 7px; padding: 0 14px 13px; border-bottom: 1px solid var(--line); }
+    .tool-extra select { flex: 1; min-width: 0; min-height: 34px; padding: 0 8px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: var(--ink); font-size: .78rem; }
+    .library-count { padding: 11px 14px; color: var(--muted); font-size: .75rem; }
+    .question-list { max-height: calc(100vh - 320px); overflow: auto; }
+    .question-row { width: 100%; display: grid; grid-template-columns: 7px minmax(0,1fr); gap: 12px; padding: 14px; border: 0; border-top: 1px solid var(--line); background: #fff; text-align: left; }
+    .question-row:hover { background: #f7fbff; }
+    .question-row[aria-current="true"] { background: var(--blue-soft); }
+    .row-stroke { width: 3px; height: 100%; border-radius: 99px; background: #aac6e8; }
+    .question-row.overdue .row-stroke { background: var(--coral); }
+    .question-row h3 { margin: 4px 0 6px; overflow: hidden; font-size: .92rem; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+    .tag-line { display: flex; flex-wrap: wrap; gap: 5px; }
+    .chip { display: inline-flex; align-items: center; min-height: 20px; padding: 1px 6px; border-radius: 999px; background: #edf1f7; color: #5e6b80; font-size: .67rem; }
+    .chip.teal { background: var(--teal-soft); color: var(--teal); }
+    .chip.coral { background: var(--coral-soft); color: var(--coral); }
+    .detail-panel { position: sticky; top: 16px; min-height: 620px; overflow: hidden; }
+    .detail-empty { display: grid; min-height: 620px; place-items: center; padding: 30px; color: var(--muted); text-align: center; }
+    .detail-top { padding: 22px; border-bottom: 1px solid var(--line); background: var(--blue-soft); }
+    .detail-back { display: none; }
+    .detail-top h2 { margin: 8px 0 6px; font-size: 1.3rem; line-height: 1.4; }
+    .detail-meta { color: var(--muted); font-size: .78rem; }
+    .detail-body { display: grid; gap: 14px; padding: 18px; max-height: calc(100vh - 270px); overflow: auto; }
+    .note-block { padding: 14px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+    .note-block h3 { margin: 0 0 8px; color: var(--navy); font-size: .78rem; letter-spacing: .06em; }
+    .markdown { line-height: 1.72; overflow-wrap: anywhere; }
+    .markdown p { margin: .45em 0; }
+    .markdown h3 { margin: 1.1em 0 .55em; font-size: 1rem; }
+    .markdown mjx-container { max-width: 100%; overflow-x: auto; }
+    .knowledge { display: flex; flex-wrap: wrap; gap: 6px; }
+    .detail-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--line); background: #fff; }
+    .score-btn { min-width: 78px; min-height: 42px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: var(--ink); }
+    .score-btn:hover { border-color: var(--teal); background: var(--teal-soft); color: var(--teal); }
+    .note-image { display: block; width: 100%; aspect-ratio: 1/1; object-fit: contain; border: 1px solid var(--line); border-radius: 5px; background: #f4f7fb; }
+
+    .review-grid, .plans-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+    .review-card, .plan-card { padding: 16px; }
+    .review-card h3, .plan-card h3 { margin: 8px 0; font-size: .96rem; }
+    .week-card { padding: 16px; border-bottom: 1px solid var(--line); }
+    .week-card:last-child { border-bottom: 0; }
+    .week-summary { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 8px 0; color: var(--muted); font-size: .8rem; }
+    .week-subjects { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 8px; margin-top: 12px; }
+    .week-subject { padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: #fbfdff; }
+    .week-subject strong { display: block; font-size: .84rem; }
+    .week-subject span { display: block; margin-top: 4px; color: var(--muted); font-size: .75rem; }
+    .empty { display: grid; min-height: 180px; place-items: center; padding: 20px; color: var(--muted); text-align: center; }
+    .settings { width: min(620px,100%); padding: 20px; }
+    .form-row { display: grid; gap: 7px; margin: 16px 0; }
+    .form-row label { font-size: .8rem; font-weight: 700; }
+    .reading-kpis { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); margin-bottom: 16px; }
+    .reading-kpi { min-height: 108px; padding: 16px; border-right: 1px solid var(--line); }
+    .reading-kpi:last-child { border-right: 0; }
+    .reading-kpi small { display: block; color: var(--muted); font-size: .73rem; }
+    .reading-kpi b { display: block; margin: 8px 0 2px; color: var(--navy); font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+    .reading-grid { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(360px,.7fr); gap: 16px; align-items: start; }
+    .reading-stack { display: grid; gap: 16px; }
+    .matrix-wrap { overflow: auto; }
+    .reading-matrix { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    .reading-matrix th, .reading-matrix td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .reading-matrix th { position: sticky; top: 0; background: #f5f8fc; color: #526078; font-size: .7rem; }
+    .reading-matrix tbody tr:hover { background: #f8fbff; }
+    .matrix-year { white-space: nowrap; font-weight: 750; }
+    .matrix-score { display: block; color: var(--navy); font-weight: 750; font-variant-numeric: tabular-nums; }
+    .matrix-recent { display: block; color: var(--muted); font-size: .68rem; white-space: nowrap; }
+    .matrix-empty { color: #8a95a8; }
+    .year-card-list { display: none; }
+    .reading-form { display: grid; gap: 14px; }
+    .field-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; }
+    .field { display: grid; gap: 5px; min-width: 0; }
+    .field.span-2 { grid-column: span 2; }
+    .field.full { grid-column: 1/-1; }
+    .field label, .field > span, .fieldset-label { color: #344158; font-size: .76rem; font-weight: 750; }
+    .field input, .field select, .field textarea, .reading-search, .reading-batch { width: 100%; min-height: 44px; padding: 9px 10px; border: 1px solid #cfd9e7; border-radius: 5px; background: #fff; color: var(--ink); }
+    .field textarea { min-height: 112px; resize: vertical; line-height: 1.55; }
+    .helper { margin: 0; color: var(--muted); font-size: .7rem; }
+    .wrong-entry { border: 1px solid var(--line); border-radius: 6px; background: #fbfdff; }
+    .wrong-entry summary { min-height: 48px; padding: 12px; cursor: pointer; font-size: .8rem; font-weight: 750; }
+    .wrong-entry-body { display: grid; gap: 11px; padding: 0 12px 12px; }
+    .choice-row { display: flex; flex-wrap: wrap; gap: 7px 12px; }
+    .choice { display: inline-flex; align-items: center; gap: 5px; min-height: 36px; color: #44516a; font-size: .75rem; }
+    .choice input { width: 18px; height: 18px; }
+    .inline-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .analysis-grid { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(300px,.8fr); gap: 16px; }
+    .trend-chart { width: 100%; height: 210px; border: 1px solid var(--line); border-radius: 6px; background: #fbfdff; }
+    .bar-list { display: grid; gap: 9px; }
+    .bar-row { display: grid; grid-template-columns: 76px minmax(0,1fr) 42px; align-items: center; gap: 8px; font-size: .73rem; }
+    .bar-track { height: 9px; overflow: hidden; border-radius: 99px; background: #e8eef6; }
+    .bar-fill { display: block; height: 100%; border-radius: inherit; background: var(--teal); }
+    .bar-value { text-align: right; font-variant-numeric: tabular-nums; }
+    .vocab-layout { display: grid; grid-template-columns: minmax(320px,.72fr) minmax(0,1.28fr); gap: 16px; }
+    .vocab-list { display: grid; }
+    .vocab-row { display: grid; grid-template-columns: minmax(120px,.65fr) minmax(180px,1fr) 100px 100px; gap: 10px; align-items: center; min-height: 58px; padding: 9px 0; border-top: 1px solid var(--line); font-size: .76rem; }
+    .vocab-row:first-child { border-top: 0; }
+    .vocab-word { font-size: .9rem; font-weight: 800; }
+    .ai-candidates { display: grid; gap: 7px; margin-top: 10px; }
+    .ai-candidate { display: grid; grid-template-columns: 28px minmax(100px,.45fr) minmax(0,1fr); gap: 8px; align-items: start; padding: 9px; border: 1px solid var(--line); border-radius: 5px; background: #fbfdff; font-size: .75rem; }
+    .review-session { max-width: 720px; margin: 0 auto; padding: 28px; text-align: center; }
+    .review-word { margin: 22px 0; color: var(--navy); font-size: clamp(2rem,6vw,3.4rem); }
+    .review-answer { padding: 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--teal-soft); text-align: left; }
+    .history-list { display: grid; gap: 8px; }
+    .history-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 5px; }
+    .history-row > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; align-items: start; }
+    .legacy-hint { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+    .legacy-hint:first-child { border-top: 0; }
+    .home-reading-card { width: 100%; display: grid; grid-template-columns: 42px minmax(0,1fr) auto; gap: 10px; align-items: center; min-height: 66px; padding: 10px; border: 1px solid #b9ded9; border-radius: 6px; background: var(--teal-soft); color: var(--ink); text-align: left; }
+    .home-reading-card b { color: var(--teal); font-size: 1.25rem; }
+    .toast { position: fixed; z-index: 60; right: 18px; bottom: 18px; max-width: min(360px,calc(100vw - 36px)); padding: 12px 15px; border-radius: 6px; background: #172033; color: #fff; font-size: .85rem; opacity: 0; pointer-events: none; transform: translateY(10px); transition: opacity 180ms ease, transform 180ms ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 980px) {
+      .masthead { grid-template-columns: 1fr; gap: 10px; }
+      .mast-actions { justify-content: space-between; }
+      .hero-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .hero-focus { grid-column: 1/-1; }
+      .hero-stat:nth-child(3) { border-right: 0; }
+      .home-grid, .wrong-layout { grid-template-columns: 1fr; }
+      .detail-panel { position: static; min-height: 0; }
+      .question-list { max-height: 420px; }
+      .detail-body { max-height: none; }
+      .review-grid, .plans-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .reading-kpis { grid-template-columns: repeat(3,minmax(0,1fr)); }
+      .reading-kpi:nth-child(3) { border-right: 0; }
+      .reading-grid, .analysis-grid, .vocab-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 620px) {
+      body { font-size: 16px; }
+      .masthead { min-height: auto; padding: 12px 16px; }
+      .brand-copy span { max-width: 210px; }
+      .mast-actions { width: 100%; }
+      .read-state { display: none; }
+      .worknav { width: 100%; padding: 8px 12px; border-bottom: 1px solid var(--line); background: #fff; }
+      .nav-tab { min-height: 42px; padding: 0 11px; }
+      .quiet-btn, .primary-btn, .danger-btn, .score-btn, .nav-tab { min-height: 44px; }
+      main { width: min(100% - 28px, 1360px); padding-top: 10px; padding-bottom: 40px; }
+      .view-head { align-items: start; flex-direction: column; gap: 9px; margin-bottom: 14px; }
+      h1 { font-size: 1.42rem; }
+      .hero-grid { display: grid; gap: 8px; border: 0; background: transparent; }
+      .hero-focus, .hero-stat { min-height: 96px; padding: 15px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+      .hero-focus { background: var(--blue-soft); }
+      .hero-stat b { font-size: 1.35rem; }
+      .section { padding: 15px; }
+      .library-tools { grid-template-columns: 1fr; }
+      .question-list { max-height: none; }
+      .detail-panel { border-radius: 7px; }
+      .wrong-layout.has-selection .library-panel { display: none; }
+      .detail-back { display: inline-flex; align-items: center; min-height: 38px; margin: 0 0 12px; padding: 0 10px; border: 1px solid #b7c8df; border-radius: 5px; background: #fff; color: var(--navy); }
+      .detail-top { padding: 16px; }
+      .detail-body { padding: 14px; }
+      .detail-actions { padding: 12px 14px; }
+      .detail-actions .quiet-btn, .detail-actions .primary-btn, .detail-actions .danger-btn { flex: 1 1 44%; min-height: 44px; }
+      .review-grid, .plans-grid { grid-template-columns: 1fr; }
+      .comprehensive-plan-section { grid-column: auto !important; }
+      .reading-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .reading-kpi { min-height: 90px; border-bottom: 1px solid var(--line); }
+      .reading-kpi:nth-child(odd) { border-right: 1px solid var(--line); }
+      .reading-kpi:nth-child(even) { border-right: 0; }
+      .matrix-wrap { display: none; }
+      .year-card-list { display: grid; gap: 8px; }
+      .year-card { padding: 12px; border: 1px solid var(--line); border-radius: 6px; }
+      .year-card-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+      .year-texts { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+      .year-text { min-height: 48px; padding: 7px; border-radius: 4px; background: #f3f7fc; font-size: .72rem; }
+      .field-grid { grid-template-columns: 1fr 1fr; }
+      .field.span-2 { grid-column: span 2; }
+      .vocab-row { grid-template-columns: minmax(100px,.6fr) minmax(0,1fr); }
+      .vocab-row > :nth-child(3), .vocab-row > :nth-child(4) { font-size: .68rem; }
+      .ai-candidate { grid-template-columns: 28px minmax(0,1fr); }
+      .ai-candidate > :last-child { grid-column: 2; }
+    }
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#appMain">跳到主要内容</a>
+  <header class="masthead">
+    <div class="brand"><div class="brand-mark">研</div><div class="brand-copy"><strong>考研计划工作台</strong><span id="todayText">加载日期中</span></div></div>
+    <div class="mast-actions"><span class="read-state" id="accessText">正在连接数据</span><button class="quiet-btn" type="button" data-action="open-settings">设置</button><button class="primary-btn" type="button" data-action="go-wrong">错题资料库</button></div>
+  </header>
+  <nav class="worknav" aria-label="工作区导航" id="worknav"></nav>
+  <main id="appMain" tabindex="-1"><div id="app"></div></main>
+  <div class="toast" role="status" aria-live="polite" id="toast"></div>
+
+  <script src="english-reading-core.js"></script>
+  <script>
+    const REVIEW_INTERVALS = [1, 3, 7, 15, 30];
+    function createDeviceId() {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+      return `studio-${Date.now()}-${Math.random().toString(16).slice(2)}-${Math.random().toString(16).slice(2)}`;
+    }
+    const store = { state: null, view: "home", selectedId: "", filters: { query: "", subject: "", status: "active" }, listLimit: 40, token: sessionStorage.getItem("studyStudioToken") || "", device: localStorage.getItem("studyStudioDevice") || createDeviceId(), saving: false, readingScope: "first", vocabularyQuery: "", reviewReveal: false, reviewWordId: "", aiCandidates: [] };
+    localStorage.setItem("studyStudioDevice", store.device);
+    const app = document.querySelector("#app");
+    const nav = document.querySelector("#worknav");
+    const toast = document.querySelector("#toast");
+    const VIEWS = [
+      ["home", "今日总览"], ["reading", "英语阅读"], ["wrong", "错题资料库"], ["reviews", "待复盘"], ["plans", "规划路径"], ["settings", "设置"]
+    ];
+
+    function esc(value) { return String(value ?? "").replace(/[&<>\"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[char])); }
+    function dateKey(date = new Date()) { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai" }).format(date); }
+    function formatDate(value) { if (!value) return "未设定"; const date = new Date(value.length === 10 ? `${value}T00:00:00+08:00` : value); return Number.isNaN(date) ? value : new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric" }).format(date); }
+    function formatDateTime(value) { if (!value) return "未记录"; const date = new Date(value); return Number.isNaN(date) ? value : new Intl.DateTimeFormat("zh-CN", { month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit" }).format(date); }
+    function stripMarkdown(value) { return String(value || "").replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/[`*_>#]/g, "").replace(/\$\$?|\\\[|\\\]/g, "").replace(/\s+/g, " ").trim(); }
+    function markdown(value) { return esc(value || "暂无内容").replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"); }
+    function relativeAsset(url) { return /^\/(generated-notes|external-question-assets)\//.test(url || "") ? `.${url}` : url; }
+    function questions() { return Array.isArray(store.state?.wrongQuestions) ? store.state.wrongQuestions : []; }
+    function isArchived(question) { return question.status === "archived"; }
+    function nextReview(question) { return (question.reviews || []).filter(review => !review.completedAt).sort((a,b) => String(a.dueDate).localeCompare(String(b.dueDate)))[0] || null; }
+    function overdue(question) { const review = nextReview(question); return Boolean(review && review.dueDate < dateKey() && !isArchived(question)); }
+    function progress(question) { const all = question.reviews || []; return `${all.filter(item => item.completedAt).length}/${all.length}`; }
+    function showToast(text) { toast.textContent = text; toast.classList.add("show"); clearTimeout(showToast.timer); showToast.timer = setTimeout(() => toast.classList.remove("show"), 3200); }
+    function authHeaders(extra = {}) { return { ...extra, "X-Study-Token": store.token, "X-Study-Device": store.device }; }
+
+    async function load() {
+      try {
+        const response = await fetch("api/state");
+        const payload = await response.json();
+        if (!response.ok || !payload.state) throw new Error(payload.error || "无法读取数据");
+        store.state = payload.state;
+        store.state.englishReading = EnglishReadingCore.normalize(store.state.englishReading);
+        store.state.version = Math.max(6, Number(store.state.version) || 0);
+        if (!store.selectedId) store.selectedId = questions().find(question => !isArchived(question))?.id || questions()[0]?.id || "";
+        document.querySelector("#todayText").textContent = new Intl.DateTimeFormat("zh-CN", { year:"numeric", month:"long", day:"numeric", weekday:"long" }).format(new Date());
+        document.querySelector("#accessText").textContent = store.token ? "已解锁，可编辑" : "只读浏览";
+        render();
+      } catch (error) {
+        app.innerHTML = `<section class="paper empty"><div><h1>暂时无法读取学习数据</h1><p>${esc(error.message || "请稍后重试")}</p><button class="primary-btn" data-action="reload">重新连接</button></div></section>`;
+      }
+    }
+
+    function renderNav() {
+      const readingProjection = store.state ? EnglishReadingCore.project(store.state.englishReading, { now: dateKey() }) : null;
+      const counts = { reading: readingProjection?.stats.dueVocabulary || 0, wrong: questions().filter(question => !isArchived(question)).length, reviews: questions().filter(question => { const review = nextReview(question); return review && review.dueDate <= dateKey() && !isArchived(question); }).length, plans: (store.state?.plans || []).filter(plan => !plan.completedAt).length };
+      nav.innerHTML = VIEWS.map(([key, label]) => `<button class="nav-tab" type="button" data-view="${key}" aria-selected="${store.view === key}">${label}${counts[key] ? `<span class="nav-count">${counts[key]}</span>` : ""}</button>`).join("");
+    }
+
+    function render() {
+      if (!store.state) return;
+      renderNav();
+      if (store.view === "reading") renderReading();
+      else if (store.view === "wrong") renderWrong();
+      else if (store.view === "reviews") renderReviews();
+      else if (store.view === "plans") renderPlans();
+      else if (store.view === "settings") renderSettings();
+      else renderHome();
+    }
+
+    function renderHome() {
+      const today = dateKey();
+      const daily = (store.state.dailyTasks || []).filter(task => task.date === today);
+      const due = questions().filter(question => { const review = nextReview(question); return review && review.dueDate <= today && !isArchived(question); });
+      const overdueItems = due.filter(overdue);
+      const readingDue = EnglishReadingCore.project(store.state.englishReading, { now: today }).stats.dueVocabulary;
+      const focus = [...due.map(question => ({ type:"错题", title:question.title, meta:`${nextReview(question)?.label || "待复盘"} · ${progress(question)}`, due: overdue(question) ? "已逾期" : "今天" })), ...daily.filter(task => task.status !== "done").map(task => ({ type:"任务", title:task.title, meta:task.subject || "今日执行", due:"今天" }))].slice(0, 7);
+      app.innerHTML = `
+        <section class="view-head"><div><p class="eyebrow">PLANNING DESK</p><h1>今天的推进面板</h1><p>先处理到期项，再回到你的长期规划。</p></div><button class="quiet-btn" data-action="go-wrong">打开错题资料库</button></section>
+        <section class="hero-grid">
+          <div class="hero-focus"><small>当前重点</small><strong>${focus[0] ? esc(stripMarkdown(focus[0].title)) : "今天的主线还没有设定"}</strong><small>${focus[0] ? `${focus[0].type} · ${focus[0].meta}` : "去规划路径安排一件最重要的事"}</small></div>
+          <div class="hero-stat teal"><small>今日待复盘</small><b>${due.length}</b><small>${overdueItems.length ? `${overdueItems.length} 项已逾期` : "没有逾期错题"}</small></div>
+          <div class="hero-stat navy"><small>今日任务</small><b>${daily.filter(task => task.status !== "done").length}</b><small>已完成 ${daily.filter(task => task.status === "done").length}/${daily.length}</small></div>
+          <div class="hero-stat coral"><small>错题资料</small><b>${questions().filter(question => !isArchived(question)).length}</b><small>持续积累的复盘卡片</small></div>
+        </section>
+        <section class="home-grid">
+          <section class="paper section"><div class="section-head"><div><h2>今天先做这些</h2><span>按到期程度排序</span></div><button class="quiet-btn" data-action="go-reviews">查看全部</button></div><div class="focus-list">${focus.length ? focus.map((item,index) => `<div class="focus-row"><span class="row-index">${index + 1}</span><div><div class="row-title">${esc(stripMarkdown(item.title))}</div><div class="row-meta">${esc(item.type)} · ${esc(item.meta)}</div></div><span class="row-badge">${esc(item.due)}</span></div>`).join("") : `<div class="empty">今天没有待处理的复习和任务。</div>`}</div></section>
+          <section class="paper section"><div class="section-head"><div><h2>最近收录</h2><span>错题资料库与阅读复习</span></div></div><button class="home-reading-card" data-action="start-word-review"><span class="row-index">词</span><span><strong>阅读单词待复习 ${readingDue} 个</strong><span class="row-meta">点击进入连续复习，不拆成零散任务</span></span><span class="row-badge">开始</span></button><div class="mini-list">${questions().slice().sort((a,b) => String(b.createdAt || "").localeCompare(String(a.createdAt || ""))).slice(0,4).map((question,index) => `<button class="mini-row" data-action="select-question" data-id="${esc(question.id)}"><span class="row-index">${index + 1}</span><div><div class="row-title">${esc(stripMarkdown(question.title))}</div><div class="row-meta">${esc(question.subject)} · ${progress(question)} 轮</div></div><span class="row-badge">查看</span></button>`).join("")}</div></section>
+        </section>`;
+    }
+
+    function readingData() { return store.state.englishReading = EnglishReadingCore.normalize(store.state.englishReading); }
+    function readingProjection() { return EnglishReadingCore.project(readingData(), { now: dateKey(), scope: store.readingScope }); }
+    function optionList(values, selected) { return values.map(value => `<option value="${esc(value)}"${value === selected ? " selected" : ""}>${esc(value)}</option>`).join(""); }
+    function choiceList(name, values) { return values.map(value => `<label class="choice"><input type="checkbox" name="${esc(name)}" value="${esc(value)}">${esc(value)}</label>`).join(""); }
+    function scoreCell(item) {
+      if (item.firstScore == null) return `<span class="matrix-empty">未录入</span>`;
+      const change = item.improvement ? ` · ${item.improvement > 0 ? "+" : ""}${item.improvement}` : "";
+      return `<span class="matrix-score">${item.firstScore}/10</span><span class="matrix-recent">最近 ${item.latestScore}/10${change} · ${item.attempts.length} 次</span>`;
+    }
+    function readingLinkLabel(item) {
+      if (!item.linkedWrongQuestionId) return "";
+      return questions().some(question => question.id === item.linkedWrongQuestionId) ? "· 已深入复盘" : "· 链接失效，可重新创建";
+    }
+    function renderTrend(trend) {
+      if (!trend.length) return `<div class="empty">四篇首做齐全后显示年度 /40 趋势。</div>`;
+      const width = 640, height = 210, pad = 34;
+      const points = trend.map((item,index) => {
+        const x = trend.length === 1 ? width / 2 : pad + index * (width - pad * 2) / (trend.length - 1);
+        const y = height - pad - item.score / 40 * (height - pad * 2);
+        return { ...item, x, y };
+      });
+      return `<svg class="trend-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="完整年份首做总分趋势">${[0,10,20,30,40].map(value => { const y=height-pad-value/40*(height-pad*2); return `<line x1="${pad}" x2="${width-pad}" y1="${y}" y2="${y}" stroke="#dce4ef"/><text x="5" y="${y+4}" font-size="11" fill="#65728a">${value}</text>`; }).join("")}<polyline fill="none" stroke="#087e75" stroke-width="3" points="${points.map(item => `${item.x},${item.y}`).join(" ")}"/>${points.map(item => `<g><circle cx="${item.x}" cy="${item.y}" r="5" fill="#fff" stroke="#087e75" stroke-width="3"/><text x="${item.x}" y="${item.y-10}" text-anchor="middle" font-size="11" fill="#172033">${item.score}</text><text x="${item.x}" y="${height-8}" text-anchor="middle" font-size="10" fill="#65728a">${item.year}</text></g>`).join("")}</svg>`;
+    }
+    function renderBars(data) {
+      const entries = Object.entries(data).sort((a,b) => b[1]-a[1]);
+      const max = Math.max(1, ...entries.map(item => item[1]));
+      return entries.length ? `<div class="bar-list">${entries.map(([label,value]) => `<div class="bar-row"><span>${esc(label)}</span><span class="bar-track"><span class="bar-fill" style="width:${value/max*100}%"></span></span><span class="bar-value">${value} 分</span></div>`).join("")}</div>` : `<div class="empty">还没有可统计的错题。</div>`;
+    }
+    function wrongEntry(questionNumber) {
+      return `<details class="wrong-entry"><summary><label class="choice"><input type="checkbox" name="wrong-q" value="${questionNumber}">第 ${questionNumber} 题答错（勾选后填写）</label></summary><div class="wrong-entry-body"><div class="field-grid"><label class="field"><span>你的答案</span><select name="selected-${questionNumber}">${optionList(["A","B","C","D","未作答"],"A")}</select></label><label class="field"><span>正确答案</span><select name="correct-${questionNumber}">${optionList(["A","B","C","D"],"B")}</select></label><label class="field span-2"><span>题型</span><select name="type-${questionNumber}">${optionList(EnglishReadingCore.QUESTION_TYPES,"细节")}</select></label></div><div><div class="fieldset-label">能力原因（至少一项）</div><div class="choice-row">${choiceList(`ability-${questionNumber}`,EnglishReadingCore.ABILITY_REASONS)}</div></div><div><div class="fieldset-label">干扰项（可多选）</div><div class="choice-row">${choiceList(`distractor-${questionNumber}`,EnglishReadingCore.DISTRACTORS)}<label class="choice"><input type="checkbox" name="na-${questionNumber}">不适用</label></div></div><label class="field"><span>复盘备注</span><input name="notes-${questionNumber}" placeholder="定位依据、排除逻辑或提醒"></label></div></details>`;
+    }
+    function renderReviewSession(projection) {
+      const word = projection.dueVocabulary.find(item => item.id === store.reviewWordId) || projection.dueVocabulary[0];
+      if (!word) return `<section class="paper review-session"><h2>今日阅读词汇复习完成</h2><p class="row-meta">到期队列已经清空。</p><button class="primary-btn" data-action="close-word-review">返回英语阅读</button></section>`;
+      store.reviewWordId = word.id;
+      const contexts = word.sources.filter(source => !source.deleted && source.contextSentence).map(source => source.contextSentence);
+      return `<section class="view-head"><div><p class="eyebrow">VOCABULARY REVIEW</p><h1>阅读词汇复习</h1><p>英文词元 → 揭示释义与原文语境 → 记录真实熟悉度。</p></div><span class="row-badge">剩余 ${projection.dueVocabulary.length} 个</span></section><section class="paper review-session"><span class="chip teal">阶段 ${word.stage}</span><div class="review-word">${esc(word.lemma)}</div>${store.reviewReveal ? `<div class="review-answer"><strong>${esc(word.meanings.join("；") || "暂无释义")}</strong><p>${esc(contexts[0] || "暂无原文语境")}</p>${word.forms.length > 1 ? `<span class="row-meta">变形：${esc(word.forms.join("、"))}</span>` : ""}</div><div class="inline-actions" style="justify-content:center;margin-top:18px"><button class="score-btn" data-action="rate-word" data-rating="known">认识</button><button class="score-btn" data-action="rate-word" data-rating="fuzzy">模糊</button><button class="score-btn" data-action="rate-word" data-rating="forgot">忘记</button></div>` : `<button class="primary-btn" data-action="reveal-word">揭示释义与语境</button>`}</section>`;
+    }
+    function renderReading() {
+      const projection = readingProjection();
+      if (store.reviewWordId || store.view === "word-review") { app.innerHTML = renderReviewSession(projection); return; }
+      const hints = EnglishReadingCore.legacyHints(store.state.dailyTasks, projection.reading);
+      const words = projection.reading.vocabulary.filter(word => !store.vocabularyQuery || [word.lemma,...word.meanings,...word.forms].join(" ").toLowerCase().includes(store.vocabularyQuery.toLowerCase()));
+      const passages = projection.reading.passages.slice().sort((a,b) => b.year-a.year || a.textNumber-b.textNumber);
+      const currentYear = new Date().getFullYear();
+      const currentText = 1;
+      const range = EnglishReadingCore.questionRange(currentText);
+      app.innerHTML = `
+        <section class="view-head"><div><p class="eyebrow">ENGLISH READING</p><h1>英语阅读成绩与复习</h1><p>传统阅读 A 节 · 首做成绩、错因和词汇复习统一归档。</p></div><button class="primary-btn" data-action="start-word-review">复习到期词汇（${projection.stats.dueVocabulary}）</button></section>
+        <section class="paper reading-kpis">
+          <div class="reading-kpi"><small>完整年份</small><b>${projection.stats.completedYears}</b><small>四篇首做齐全</small></div>
+          <div class="reading-kpi"><small>完成篇数</small><b>${projection.stats.completedPassages}</b><small>按首做统计</small></div>
+          <div class="reading-kpi"><small>首做均分</small><b>${projection.stats.averageFirstScore.toFixed(1)}</b><small>每篇 /10</small></div>
+          <div class="reading-kpi"><small>平均耗时</small><b>${projection.stats.averageDuration.toFixed(0)}</b><small>分钟 / 篇</small></div>
+          <div class="reading-kpi"><small>今日待复习</small><b>${projection.stats.dueVocabulary}</b><small>阅读词汇</small></div>
+        </section>
+        <div class="reading-stack">
+          <section class="paper section"><div class="section-head"><div><h2>年份 × Text 看板</h2><span>首做 / 最近 / 提升</span></div></div><div class="matrix-wrap"><table class="reading-matrix"><thead><tr><th>年份</th><th>Text 1 · 21–25</th><th>Text 2 · 26–30</th><th>Text 3 · 31–35</th><th>Text 4 · 36–40</th><th>年度</th></tr></thead><tbody>${projection.years.map(year => `<tr><td class="matrix-year">${year.year}<span class="matrix-recent">${year.examLabel}</span></td>${year.texts.map(item => `<td>${scoreCell(item)}</td>`).join("")}<td><span class="matrix-score">${year.displayScore}</span></td></tr>`).join("")}</tbody></table></div><div class="year-card-list">${projection.years.map(year => `<article class="year-card"><div class="year-card-head"><strong>${year.year} · ${year.examLabel}</strong><span class="row-badge">${year.displayScore}</span></div><div class="year-texts">${year.texts.map(item => `<div class="year-text">Text ${item.textNumber}${scoreCell(item)}</div>`).join("")}</div></article>`).join("")}</div></section>
+          <div class="reading-grid">
+            <section class="paper section"><div class="section-head"><div><h2>录入一次作答</h2><span>分数由错题数自动计算</span></div></div><form class="reading-form" id="attemptForm"><div class="field-grid"><label class="field"><span>年份</span><input name="year" type="number" min="2005" max="${currentYear}" value="${currentYear}" required></label><label class="field"><span>篇号</span><select name="textNumber">${[1,2,3,4].map(value=>`<option value="${value}">Text ${value}</option>`).join("")}</select></label><label class="field"><span>日期</span><input name="date" type="date" value="${dateKey()}" required></label><label class="field"><span>耗时（分钟）</span><input name="durationMinutes" type="number" min="0" max="600" value="0"></label><label class="choice"><input name="timed" type="checkbox">限时完成</label><label class="field full"><span>阅读原文（可选，用于 AI 提词）</span><textarea name="passageText" maxlength="30000" placeholder="粘贴全文，最多 30,000 字符"></textarea><span class="helper">全文仅保存在当前私有学习档案；调用 AI 提词时会发送给已配置的文本提供商。</span></label></div><div id="wrongEntries">${Array.from({length:5},(_,i)=>wrongEntry(range.start+i)).join("")}</div><button class="primary-btn" type="submit">保存作答</button></form></section>
+            <div class="reading-stack"><section class="paper section"><div class="section-head"><div><h2>历史待补录</h2><span>${hints.length} 条提示</span></div></div>${hints.length ? hints.slice(0,12).map(hint => `<div class="legacy-hint"><div><strong>${hint.year} · Text ${hint.textNumber}</strong><div class="row-meta">${esc(hint.title)} · ${esc(hint.date)}</div></div><div class="inline-actions"><button class="quiet-btn" data-action="use-legacy" data-year="${hint.year}" data-text="${hint.textNumber}" data-task="${esc(hint.taskId)}" data-date="${esc(hint.date)}" data-duration="${hint.durationMinutes}">补录</button><button class="quiet-btn" data-action="ignore-legacy" data-task="${esc(hint.taskId)}">忽略</button></div></div>`).join("") : `<p class="row-meta">没有待确认的历史阅读任务。</p>`}</section><section class="paper section"><div class="section-head"><div><h2>作答历史</h2><span>${passages.reduce((sum,item)=>sum+item.attempts.length,0)} 次</span></div></div><div class="history-list">${passages.flatMap(passage => passage.attempts.map(attempt => `<article class="history-row"><div><strong>${passage.year} · Text ${passage.textNumber} · ${EnglishReadingCore.score(attempt)}/10</strong><div class="row-meta">${esc(attempt.date)} · ${attempt.durationMinutes} 分钟 · ${attempt.wrongAnswers.length} 道错题</div>${attempt.wrongAnswers.map(wrongItem=>`<div class="row-meta">Q${wrongItem.questionNumber} ${esc(wrongItem.abilityReasons.join("、"))} ${readingLinkLabel(wrongItem)}</div>`).join("")}</div><div>${attempt.wrongAnswers.filter(item=>!item.linkedWrongQuestionId || !questions().some(question=>question.id===item.linkedWrongQuestionId)).slice(0,1).map(item=>`<button class="quiet-btn" data-action="deep-review" data-passage="${esc(passage.id)}" data-attempt="${esc(attempt.id)}" data-wrong="${esc(item.id)}">${item.linkedWrongQuestionId ? "重新创建复盘" : "深入复盘"}</button>`).join("")}<button class="danger-btn" data-action="delete-attempt" data-attempt="${esc(attempt.id)}">删除</button></div></article>`)).slice(0,20).join("") || `<p class="row-meta">还没有正式作答记录。</p>`}</div></section></div>
+          </div>
+          <section class="paper section"><div class="section-head"><div><h2>错因分析</h2><span>题型表示错题失分，不代表正确率</span></div><select id="readingScope" aria-label="统计范围"><option value="first"${store.readingScope==="first"?" selected":""}>仅首做</option><option value="all"${store.readingScope==="all"?" selected":""}>全部作答</option></select></div><div class="analysis-grid"><div><h3>完整年份首做 /40 趋势</h3>${renderTrend(projection.trend)}<table class="reading-matrix"><thead><tr><th>年份</th><th>首做总分</th></tr></thead><tbody>${projection.trend.map(item=>`<tr><td>${item.year}</td><td>${item.score}/40</td></tr>`).join("")}</tbody></table></div><div class="reading-stack"><div><h3>能力原因失分</h3>${renderBars(projection.analysis.abilityReasons)}</div><div><h3>干扰项失分</h3>${renderBars(projection.analysis.distractors)}</div><div><h3>题型失分</h3>${renderBars(projection.analysis.questionTypes)}</div></div></div></section>
+          <section class="paper section"><div class="section-head"><div><h2>阅读词库</h2><span>${projection.reading.vocabulary.length} 个去重词元</span></div><button class="primary-btn" data-action="start-word-review">复习 ${projection.stats.dueVocabulary} 个到期词</button></div><div class="vocab-layout"><div class="reading-stack"><form id="wordForm" class="reading-form"><div class="field-grid"><label class="field span-2"><span>词元</span><input name="lemma" required placeholder="例如 derive"></label><label class="field span-2"><span>中文释义</span><input name="meaning" required placeholder="结合语境的释义"></label><label class="field full"><span>原文例句</span><input name="contextSentence" placeholder="可选"></label></div><button class="primary-btn" type="submit">添加词汇</button></form><form id="batchWordForm" class="reading-form"><label class="field"><span>批量粘贴</span><textarea class="reading-batch" name="batch" rows="5" placeholder="每行：单词 | 中文释义 | 原文例句"></textarea></label><button class="quiet-btn" type="submit">批量添加</button></form><div><button class="quiet-btn" data-action="extract-vocabulary">AI 从上方作答原文提词</button><div class="ai-candidates">${store.aiCandidates.map((item,index)=>`<label class="ai-candidate"><input type="checkbox" name="ai-word" value="${index}" checked><strong>${esc(item.lemma)}</strong><span>${esc(item.meaningZh)}<br><span class="row-meta">${esc(item.contextSentence)}</span></span></label>`).join("")}</div>${store.aiCandidates.length ? `<button class="primary-btn" data-action="accept-ai-words">添加已勾选候选</button>` : ""}</div></div><div><input class="reading-search" id="vocabularySearch" type="search" value="${esc(store.vocabularyQuery)}" placeholder="搜索词元、变形或释义" aria-label="搜索阅读词库"><div class="vocab-list">${words.map(word=>`<div class="vocab-row"><span><span class="vocab-word">${esc(word.lemma)}</span><span class="row-meta">${esc(word.forms.filter(item=>item!==word.lemma).join("、"))}</span></span><span>${esc(word.meanings.join("；") || "未填写释义")}</span><span>${word.status==="mastered"?"已掌握":`阶段 ${word.stage}`}</span><span>${word.nextReviewDate || "—"}<br><span class="row-meta">${word.sources.length} 个来源</span></span></div>`).join("") || `<div class="empty">没有符合条件的词汇。</div>`}</div></div></div></section>
+        </div>`;
+    }
+
+    function filteredQuestions() {
+      const query = store.filters.query.trim().toLowerCase();
+      return questions().filter(question => {
+        if (store.filters.subject && question.subject !== store.filters.subject) return false;
+        if (store.filters.status === "active" && isArchived(question)) return false;
+        if (store.filters.status === "due" && (!nextReview(question) || isArchived(question))) return false;
+        if (store.filters.status === "overdue" && !overdue(question)) return false;
+        if (store.filters.status === "archived" && !isArchived(question)) return false;
+        const text = [question.title, question.questionMarkdown, question.mistakeReason, question.source, ...(question.knowledgePoints || [])].join(" ").toLowerCase();
+        return !query || text.includes(query);
+      }).sort((a,b) => { const aReview = nextReview(a)?.dueDate || "9999"; const bReview = nextReview(b)?.dueDate || "9999"; return aReview.localeCompare(bReview) || String(b.createdAt || "").localeCompare(String(a.createdAt || "")); });
+    }
+
+    function renderWrong() {
+      const items = filteredQuestions();
+      const visibleItems = items.slice(0, store.listLimit);
+      const selected = store.selectedId ? items.find(question => question.id === store.selectedId) || null : null;
+      const subjects = [...new Set(questions().map(question => question.subject).filter(Boolean))].sort();
+      app.innerHTML = `
+        <section class="view-head"><div><p class="eyebrow">ERROR NOTEBOOK</p><h1>错题资料库</h1><p>题目、错因、解析与复盘记录放在同一个阅读工作区。</p></div><span class="row-badge">${items.length} 条结果</span></section>
+        <section class="wrong-layout${selected ? " has-selection" : ""}">
+          <section class="paper library-panel">
+            <div class="library-tools"><input type="search" data-filter="query" value="${esc(store.filters.query)}" placeholder="搜索题目、知识点或错因"><select data-filter="status"><option value="active"${store.filters.status === "active" ? " selected" : ""}>未归档</option><option value="due"${store.filters.status === "due" ? " selected" : ""}>待复盘</option><option value="overdue"${store.filters.status === "overdue" ? " selected" : ""}>已逾期</option><option value="archived"${store.filters.status === "archived" ? " selected" : ""}>已归档</option><option value="all"${store.filters.status === "all" ? " selected" : ""}>全部</option></select></div>
+            <div class="tool-extra"><select data-filter="subject"><option value="">全部科目</option>${subjects.map(subject => `<option value="${esc(subject)}"${store.filters.subject === subject ? " selected" : ""}>${esc(subject)}</option>`).join("")}</select><button class="quiet-btn" data-action="clear-filters">清除筛选</button></div>
+            <div class="library-count">显示 ${visibleItems.length}/${items.length} 道 · 点击条目切换阅读内容</div>
+            <div class="question-list">${items.length ? visibleItems.map(questionRow).join("") : `<div class="empty">没有符合当前筛选条件的错题。</div>`}${visibleItems.length < items.length ? `<div class="empty"><button class="quiet-btn" data-action="load-more">加载更多（剩余 ${items.length - visibleItems.length} 道）</button></div>` : ""}</div>
+          </section>
+          ${selected ? renderDetail(selected) : `<section class="paper detail-panel detail-empty">选择一道错题开始复盘</section>`}
+        </section>`;
+      typeset();
+    }
+
+    function questionRow(question) {
+      const review = nextReview(question);
+      const tags = [question.subject, `优先级 ${question.priority}`, review ? `${review.label} ${review.dueDate < dateKey() ? "已逾期" : formatDate(review.dueDate)}` : "已完成"];
+      return `<button class="question-row${overdue(question) ? " overdue" : ""}" type="button" data-action="select-question" data-id="${esc(question.id)}" aria-current="${question.id === store.selectedId}"><span class="row-stroke"></span><span><span class="tag-line">${tags.map((tag,index) => `<span class="chip${index === 0 ? " teal" : overdue(question) && index === 2 ? " coral" : ""}">${esc(tag)}</span>`).join("")}</span><h3>${esc(stripMarkdown(question.title))}</h3><span class="row-meta">${esc((question.knowledgePoints || []).slice(0,3).join(" · ") || "未填写知识点")} · ${progress(question)} 轮</span></span></button>`;
+    }
+
+    function renderDetail(question) {
+      const review = nextReview(question);
+      const images = (question.noteImages || []).filter(image => image?.url);
+      return `<section class="paper detail-panel"><header class="detail-top"><button class="detail-back" data-action="back-to-list">返回错题列表</button><div class="tag-line"><span class="chip teal">${esc(question.subject)}</span><span class="chip">优先级 ${esc(question.priority)}</span>${review ? `<span class="chip${overdue(question) ? " coral" : ""}">${esc(review.label)} · ${esc(formatDate(review.dueDate))}</span>` : `<span class="chip">复盘完成</span>`}</div><h2>${esc(stripMarkdown(question.title))}</h2><div class="detail-meta">收录于 ${esc(formatDateTime(question.createdAt || question.reviewStartDate))} · 已完成 ${progress(question)} 轮</div></header><div class="detail-body"><section class="note-block"><h3>题目</h3><div class="markdown">${markdown(question.questionMarkdown)}</div></section><section class="note-block"><h3>知识点</h3><div class="knowledge">${(question.knowledgePoints || []).length ? question.knowledgePoints.map(point => `<span class="chip teal">${esc(point)}</span>`).join("") : "<span class=\"row-meta\">未填写</span>"}</div></section><section class="note-block"><h3>错因 / 提醒</h3><div class="markdown">${markdown(question.mistakeReason || "未填写")}</div></section><section class="note-block"><h3>解析与答案</h3><div class="markdown">${markdown(question.detailMarkdown || question.fullMarkdown)}</div></section>${images.length ? `<section class="note-block"><h3>一图流</h3>${images.map(image => `<img class="note-image" loading="lazy" src="${esc(relativeAsset(image.url))}" alt="错题笔记图">`).join("")}</section>` : ""}</div><footer class="detail-actions">${review && !isArchived(question) ? [5,3,1].map(score => `<button class="score-btn" data-action="score" data-id="${esc(question.id)}" data-round="${esc(review.round)}" data-score="${score}">${score === 5 ? "熟练" : score === 3 ? "不熟悉" : "不会"}</button>`).join("") : ""}<button class="quiet-btn" data-action="toggle-archive" data-id="${esc(question.id)}">${isArchived(question) ? "恢复" : "归档"}</button></footer></section>`;
+    }
+
+    function renderReviews() {
+      const due = questions().filter(question => { const review = nextReview(question); return review && review.dueDate <= dateKey() && !isArchived(question); }).sort((a,b) => String(nextReview(a).dueDate).localeCompare(String(nextReview(b).dueDate)));
+      const throttle = store.state?.migrations?.wrongReviewThrottleV5;
+      const schedule = throttle?.schedule ? Object.entries(throttle.schedule).map(([date,count]) => `${formatDate(date)} ${count} 道`).join("；") : "";
+      app.innerHTML = `<section class="view-head"><div><p class="eyebrow">REVIEW QUEUE</p><h1>待复盘</h1><p>按照到期时间处理，记录一次真实掌握程度。</p>${schedule ? `<p class="row-meta">本次积压限流：${esc(schedule)}。</p>` : ""}</div><span class="row-badge">${due.length} 项</span></section><section class="review-grid">${due.length ? due.map(question => `<article class="paper review-card"><div class="tag-line"><span class="chip teal">${esc(question.subject)}</span><span class="chip${overdue(question) ? " coral" : ""}">${esc(nextReview(question).label)} · ${esc(formatDate(nextReview(question).dueDate))}</span></div><h3>${esc(stripMarkdown(question.title))}</h3><p class="row-meta">${esc((question.knowledgePoints || []).join(" · ") || "未填写知识点")}</p><button class="primary-btn" data-action="select-question" data-id="${esc(question.id)}">打开复盘</button></article>`).join("") : `<section class="paper empty">今天没有需要复盘的错题。</section>`}</section>`;
+    }
+
+    function renderPlans() {
+      const plans = store.state.plans || [];
+      const weeks = plans.filter(plan => plan.type === "week");
+      const phases = plans.filter(plan => plan.type === "phase");
+      const daily = store.state.dailyTasks || [];
+      const weekCard = plan => { const tasks = daily.filter(task => task.date >= plan.startDate && task.date <= plan.endDate && !/(背诵手册|专业背诵|\blist\s*\d+)/i.test([task.title,task.category,task.notes].join(" "))); const subjects = [...new Set([...Object.keys(plan.subjectGoals || {}), ...tasks.map(task => task.subject).filter(Boolean)])]; const done = tasks.filter(task => task.status === "done").length; const mins = tasks.reduce((sum,task) => sum + Number(task.studyMinutes || 0),0); return `<article class="week-card"><span class="chip teal">综合周</span><h3>${esc(plan.title || "综合周")}</h3><p class="row-meta">${esc(formatDate(plan.startDate))} - ${esc(formatDate(plan.endDate))}</p><div class="week-summary"><span>${tasks.length ? Math.round(done/tasks.length*100) : 0}% 完成</span><span>${done}/${tasks.length} 项任务</span><span>${Math.floor(mins/60)} 小时${mins%60 ? ` ${mins%60} 分` : ""}</span></div><div class="week-subjects">${subjects.map(subject => { const items=tasks.filter(task=>task.subject===subject), completed=items.filter(task=>task.status==="done").length; return `<div class="week-subject"><strong>${esc(subject)}</strong><span>${items.length ? Math.round(completed/items.length*100) : 0}% · ${completed}/${items.length} 项</span>${plan.subjectGoals?.[subject] ? `<span>${esc(plan.subjectGoals[subject])}</span>` : ""}</div>`; }).join("")}</div></article>`; };
+      app.innerHTML = `<section class="view-head"><div><p class="eyebrow">PLAN MAP</p><h1>规划路径</h1><p>阶段目标下统一按综合周推进，科目目标和执行量集中核对。</p></div></section><section class="plans-grid"><section class="paper section"><div class="section-head"><h2>阶段规划</h2><span>${phases.length} 项</span></div>${phases.map(plan => `<article class="plan-card"><span class="chip teal">阶段</span><h3>${esc(plan.title)}</h3><p class="row-meta">${esc(formatDate(plan.startDate))} - ${esc(formatDate(plan.endDate))}</p></article>`).join("") || `<div class="empty">还没有阶段规划。</div>`}</section><section class="paper section comprehensive-plan-section" style="grid-column: span 2"><div class="section-head"><h2>综合周</h2><span>${weeks.length} 项</span></div>${weeks.map(weekCard).join("") || `<div class="empty">还没有综合周。</div>`}</section></section>`;
+    }
+
+    function renderSettings() {
+      app.innerHTML = `<section class="view-head"><div><p class="eyebrow">ACCESS & DATA</p><h1>设置</h1><p>预览站与正式站使用独立的数据副本和服务进程。</p></div></section><section class="paper settings"><h2>编辑权限</h2><p class="row-meta">解锁后可以在 v2 数据副本中记录熟练度、归档错题；不会写入正式站数据。</p><div class="form-row"><label for="tokenField">访问 token</label><input class="token-input" id="tokenField" type="password" inputmode="numeric" autocomplete="off" placeholder="输入 token 后解锁"></div><div class="detail-actions"><button class="primary-btn" data-action="unlock">解锁编辑</button><button class="quiet-btn" data-action="lock">切换为只读</button></div></section>`;
+    }
+
+    async function save() {
+      if (!store.token) { showToast("请先在设置中解锁编辑权限。"); store.view = "settings"; render(); return false; }
+      store.saving = true;
+      try {
+        const response = await fetch("api/state", { method:"POST", headers:authHeaders({"Content-Type":"application/json"}), body:JSON.stringify({state:store.state}) });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || "保存失败");
+        showToast("已保存到私有学习档案。");
+        return true;
+      } catch (error) { showToast(error.message || "保存失败"); return false; } finally { store.saving = false; }
+    }
+
+    async function unlock() {
+      const field = document.querySelector("#tokenField");
+      const token = field?.value.trim();
+      if (!token) { showToast("请输入 token。"); return; }
+      try {
+        const response = await fetch("api/auth/check", { method:"POST", headers:{"Content-Type":"application/json","X-Study-Token":token,"X-Study-Device":store.device}, body:JSON.stringify({deviceId:store.device,deviceInfo:{platform:navigator.platform,language:navigator.language}}) });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || "token 不正确");
+        store.token = token; sessionStorage.setItem("studyStudioToken", token); document.querySelector("#accessText").textContent = "已解锁，可编辑"; showToast("已解锁 v2 数据副本。"); render();
+      } catch (error) { showToast(error.message || "解锁失败"); }
+    }
+
+    async function score(id, round, scoreValue) {
+      const question = questions().find(item => item.id === id); const review = question?.reviews?.find(item => Number(item.round) === Number(round));
+      if (!question || !review) return;
+      review.completedAt = dateKey(); review.score = Number(scoreValue);
+      if (Number(review.round) === 0) REVIEW_INTERVALS.forEach((days,index) => { const itemRound = index + 1; if (!question.reviews.some(item => Number(item.round) === itemRound)) { const date = new Date(`${review.completedAt}T00:00:00+08:00`); date.setDate(date.getDate() + days); question.reviews.push({round:itemRound,label:`第 ${itemRound} 轮`,dueDate:dateKey(date),completedAt:null,score:null}); } });
+      question.reviews.sort((a,b) => Number(a.round) - Number(b.round));
+      if (await save()) render();
+    }
+
+    function applyReading(command) {
+      store.state.englishReading = EnglishReadingCore.execute(readingData(), command, { now: dateKey(), currentYear: new Date().getFullYear() });
+      store.state.version = Math.max(6, Number(store.state.version) || 0);
+    }
+    async function saveReading(command, successText) {
+      try {
+        applyReading(command);
+        if (await save()) { if (successText) showToast(successText); render(); }
+      } catch (error) { showToast(error.message || "英语阅读数据无效。"); }
+    }
+    function formValues(form) { return new FormData(form); }
+    async function submitAttempt(form) {
+      const data = formValues(form);
+      const textNumber = Number(data.get("textNumber"));
+      const selectedQuestions = data.getAll("wrong-q").map(Number);
+      const wrongAnswers = selectedQuestions.map(questionNumber => ({
+        questionNumber,
+        selectedAnswer: data.get(`selected-${questionNumber}`),
+        correctAnswer: data.get(`correct-${questionNumber}`),
+        questionType: data.get(`type-${questionNumber}`),
+        abilityReasons: data.getAll(`ability-${questionNumber}`),
+        distractors: data.getAll(`distractor-${questionNumber}`),
+        distractorNotApplicable: data.get(`na-${questionNumber}`) === "on",
+        notes: data.get(`notes-${questionNumber}`)
+      }));
+      await saveReading({ type:"addAttempt", payload:{
+        year:Number(data.get("year")), textNumber, passageText:data.get("passageText"),
+        attempt:{ date:data.get("date"), durationMinutes:Number(data.get("durationMinutes")), timed:data.get("timed")==="on", sourceDailyTaskId:form.dataset.sourceTask || "", wrongAnswers }
+      }}, "作答已保存，成绩已自动计算。");
+    }
+    async function extractVocabulary() {
+      const passageText = document.querySelector("#attemptForm textarea[name='passageText']")?.value.trim() || "";
+      if (!passageText) { showToast("请先在作答表单中粘贴阅读原文。"); return; }
+      try {
+        const response = await fetch("api/ai/extract-reading-vocabulary", { method:"POST", headers:authHeaders({"Content-Type":"application/json"}), body:JSON.stringify({passageText,limit:20}) });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || "AI 提词失败");
+        store.aiCandidates = Array.isArray(payload.candidates) ? payload.candidates : [];
+        renderReading();
+        showToast(`已生成 ${store.aiCandidates.length} 个候选，请勾选确认。`);
+      } catch (error) { showToast(error.message || "AI 提词失败，仍可手工录入。"); }
+    }
+    async function deepReview(target) {
+      const passage = readingData().passages.find(item => item.id === target.dataset.passage);
+      const attempt = passage?.attempts.find(item => item.id === target.dataset.attempt);
+      const wrong = attempt?.wrongAnswers.find(item => item.id === target.dataset.wrong);
+      if (!passage || !attempt || !wrong) return;
+      const linked = questions().find(item => item.id === wrong.linkedWrongQuestionId);
+      if (linked) { store.selectedId = linked.id; store.view = "wrong"; render(); return; }
+      const id = `wrong-reading-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      store.state.wrongQuestions.push({
+        id, title:`${passage.year} 英语阅读 Text ${passage.textNumber} 第 ${wrong.questionNumber} 题`,
+        subject:"英语", priority:3, status:"active", source:`英语阅读 ${passage.year} Text ${passage.textNumber}`,
+        readingSourceId:wrong.id, questionMarkdown:`年份：${passage.year}\nText：${passage.textNumber}\n题号：${wrong.questionNumber}\n你的答案：${wrong.selectedAnswer}\n正确答案：${wrong.correctAnswer}`,
+        knowledgePoints:[wrong.questionType,...wrong.abilityReasons], mistakeReason:[...wrong.abilityReasons,...wrong.distractors].join("、"),
+        detailMarkdown:wrong.notes || "请在此补充定位依据、选项辨析和正确思路。", fullMarkdown:"",
+        reviewStartDate:attempt.date, createdAt:new Date().toISOString(), reviews:[{round:0,label:"首次复盘",dueDate:dateKey(),completedAt:null,score:null}]
+      });
+      applyReading({ type:"linkWrongQuestion", payload:{ passageId:passage.id, attemptId:attempt.id, wrongAnswerId:wrong.id, wrongQuestionId:id } });
+      if (await save()) { store.selectedId=id; store.view="wrong"; render(); }
+    }
+
+    document.addEventListener("click", event => {
+      const viewButton = event.target.closest("[data-view]");
+      if (viewButton) { store.view = viewButton.dataset.view; if (store.view === "wrong") store.selectedId = ""; render(); return; }
+      const target = event.target.closest("[data-action]"); if (!target) return;
+      const action = target.dataset.action;
+      if (action === "reload") load();
+      if (action === "open-settings") { store.view = "settings"; render(); }
+      if (action === "go-wrong") { store.view = "wrong"; store.selectedId = ""; render(); }
+      if (action === "go-reviews") { store.view = "reviews"; render(); }
+      if (action === "start-word-review") { store.view = "reading"; store.reviewWordId = readingProjection().dueVocabulary[0]?.id || "complete"; store.reviewReveal = false; render(); }
+      if (action === "close-word-review") { store.reviewWordId = ""; store.reviewReveal = false; store.view = "reading"; render(); }
+      if (action === "reveal-word") { store.reviewReveal = true; render(); }
+      if (action === "rate-word") { const id=store.reviewWordId; store.reviewReveal=false; applyReading({type:"reviewVocabulary",payload:{id,rating:target.dataset.rating}}); store.reviewWordId=readingProjection().dueVocabulary.find(item=>item.id!==id)?.id || "complete"; save().then(ok=>ok&&render()); }
+      if (action === "delete-attempt" && window.confirm("删除这次作答？关联词卡和通用错题会保留，来源会标记为已删除。")) saveReading({type:"deleteAttempt",payload:{attemptId:target.dataset.attempt}},"作答已删除，关联来源已保留为墓碑。");
+      if (action === "deep-review") deepReview(target);
+      if (action === "ignore-legacy") saveReading({type:"ignoreLegacyHint",payload:{taskId:target.dataset.task}},"已忽略这条历史提示。");
+      if (action === "use-legacy") { const form=document.querySelector("#attemptForm"); if(form){ form.year.value=target.dataset.year; form.textNumber.value=target.dataset.text; form.date.value=target.dataset.date; form.durationMinutes.value=target.dataset.duration; form.dataset.sourceTask=target.dataset.task; form.textNumber.dispatchEvent(new Event("change",{bubbles:true})); form.scrollIntoView({behavior:"smooth",block:"start"}); } }
+      if (action === "extract-vocabulary") extractVocabulary();
+      if (action === "accept-ai-words") { const selected=[...document.querySelectorAll("input[name='ai-word']:checked")].map(input=>store.aiCandidates[Number(input.value)]).filter(Boolean); const passageText=document.querySelector("#attemptForm textarea[name='passageText']")?.value||""; saveReading({type:"addVocabularyBatch",payload:{items:selected.map(item=>({lemma:item.lemma,surfaceForm:item.surfaceForm,meaning:item.meaningZh,source:{meaning:item.meaningZh,contextSentence:item.contextSentence || passageText.slice(0,300)}}))}},"已添加勾选的 AI 词汇候选。"); store.aiCandidates=[]; }
+      if (action === "select-question") { store.selectedId = target.dataset.id; store.view = "wrong"; render(); }
+      if (action === "back-to-list") { store.selectedId = ""; renderWrong(); }
+      if (action === "clear-filters") { store.filters = {query:"",subject:"",status:"active"}; store.listLimit = 40; render(); }
+      if (action === "load-more") { store.listLimit += 40; renderWrong(); }
+      if (action === "score") score(target.dataset.id, target.dataset.round, target.dataset.score);
+      if (action === "toggle-archive") { const question = questions().find(item => item.id === target.dataset.id); if (question) { question.status = isArchived(question) ? "active" : "archived"; save().then(ok => ok && render()); } }
+      if (action === "unlock") unlock();
+      if (action === "lock") { store.token = ""; sessionStorage.removeItem("studyStudioToken"); document.querySelector("#accessText").textContent = "只读浏览"; showToast("已切换为只读模式。"); render(); }
+    });
+    document.addEventListener("submit", event => {
+      if (event.target.id === "attemptForm") { event.preventDefault(); submitAttempt(event.target); }
+      if (event.target.id === "wordForm") { event.preventDefault(); const data=formValues(event.target); saveReading({type:"addVocabulary",payload:{lemma:data.get("lemma"),meaning:data.get("meaning"),source:{meaning:data.get("meaning"),contextSentence:data.get("contextSentence")}}},"词汇已加入复习队列。"); }
+      if (event.target.id === "batchWordForm") { event.preventDefault(); const data=formValues(event.target); const items=String(data.get("batch")||"").split(/\r?\n/).map(line=>line.split("|").map(value=>value.trim())).filter(parts=>parts[0]).map(parts=>({lemma:parts[0],meaning:parts[1]||"",source:{meaning:parts[1]||"",contextSentence:parts.slice(2).join(" | ")}})); saveReading({type:"addVocabularyBatch",payload:{items}},`已批量添加 ${items.length} 行词汇。`); }
+    });
+    document.addEventListener("input", event => { const field = event.target.closest("input[data-filter]"); if (!field) return; const value = field.value; store.filters[field.dataset.filter] = value; store.listLimit = 40; renderWrong(); requestAnimationFrame(() => { const input = document.querySelector(`input[data-filter=\"${field.dataset.filter}\"]`); if (input) { input.focus(); input.setSelectionRange(value.length, value.length); } }); });
+    document.addEventListener("change", event => {
+      const field = event.target.closest("select[data-filter]"); if (field) { store.filters[field.dataset.filter] = field.value; store.listLimit = 40; renderWrong(); return; }
+      if (event.target.id === "readingScope") { store.readingScope=event.target.value; renderReading(); return; }
+      if (event.target.matches("#attemptForm select[name='textNumber']")) { const range=EnglishReadingCore.questionRange(Number(event.target.value)); document.querySelector("#wrongEntries").innerHTML=Array.from({length:5},(_,i)=>wrongEntry(range.start+i)).join(""); }
+    });
+    document.addEventListener("input", event => {
+      if (event.target.id !== "vocabularySearch") return;
+      const value=event.target.value; store.vocabularyQuery=value; renderReading(); requestAnimationFrame(()=>{ const input=document.querySelector("#vocabularySearch"); if(input){input.focus();input.setSelectionRange(value.length,value.length);} });
+    });
+    function typeset() { setTimeout(() => { if (window.MathJax?.typesetPromise) window.MathJax.typesetPromise(Array.from(document.querySelectorAll(".markdown"))).catch(() => {}); }, 0); }
+    load();
+  </script>
+</body>
+</html>

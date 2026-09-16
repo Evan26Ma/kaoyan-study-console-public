@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>英语阅读分区重构 · 效果图</title>
+  <style>
+    :root { color-scheme: light; --ink:#171a2f; --muted:#697089; --accent:#635bff; --line:#e5e7f1; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; padding:clamp(18px,4vw,48px); background:#f6f7fb; color:var(--ink); font-family:Inter,"PingFang SC","Microsoft YaHei",sans-serif; }
+    main { width:min(1760px,100%); margin:0 auto; }
+    header { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:20px; }
+    h1 { margin:0 0 6px; font-size:clamp(1.35rem,3vw,2rem); }
+    p { margin:0; color:var(--muted); line-height:1.6; }
+    nav { display:flex; flex-wrap:wrap; gap:10px; }
+    a { min-height:44px; display:inline-flex; align-items:center; justify-content:center; padding:0 16px; border:1px solid var(--line); border-radius:10px; background:#fff; color:var(--ink); font-weight:700; text-decoration:none; }
+    a.primary { border-color:var(--accent); background:var(--accent); color:#fff; }
+    figure { margin:0; overflow:hidden; border:1px solid var(--line); border-radius:18px; background:#fff; box-shadow:0 20px 60px rgba(38,43,86,.10); }
+    img { width:100%; height:auto; display:block; }
+    figcaption { padding:14px 18px; border-top:1px solid var(--line); color:var(--muted); font-size:.86rem; }
+    @media (max-width:700px) {
+      header { align-items:stretch; flex-direction:column; }
+      nav { display:grid; grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>英语阅读分区重构效果图</h1>
+        <p>保留中控台全局导航，新增阅读概览、突出成绩录入，并集中展示成绩、错因和阅读词库。</p>
+      </div>
+      <nav aria-label="效果图资源">
+        <a href="./ENGLISH_READING_DASHBOARD_REDESIGN.md">查看技术文档</a>
+        <a class="primary" href="./assets/english-reading-dashboard-concept-v1.png" download>下载原图</a>
+      </nav>
+    </header>
+    <figure>
+      <img src="./assets/english-reading-dashboard-concept-v1.png" alt="英语阅读分区高保真网页效果图">
+      <figcaption>概念稿 v1 · 1672 × 941 · 使用真实功能结构绘制，图中数字仅用于视觉示意。</figcaption>
+    </figure>
+  </main>
+</body>
+</html>

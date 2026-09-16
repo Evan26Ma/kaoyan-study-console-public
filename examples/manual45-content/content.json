@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "packageId": "example-manual",
+  "title": "匿名示例手册",
+  "subject": "示例科目",
+  "sourcePath": "",
+  "sourceHash": "example-content-v1",
+  "importedAt": "",
+  "originalMarkdown": "",
+  "lectures": [
+    {
+      "part": "示例部分",
+      "number": 1,
+      "title": "第一讲 示例主题",
+      "unitIds": ["example-concept-1", "example-short-answer-1"]
+    }
+  ],
+  "assets": [],
+  "units": [
+    {
+      "unitId": "example-concept-1",
+      "part": "示例部分",
+      "lecture": "第一讲 示例主题",
+      "lectureNumber": 1,
+      "type": "concept",
+      "number": 1,
+      "title": "示例概念",
+      "promptMarkdown": "请解释示例概念。",
+      "answerMarkdown": "这是不含真实学习资料的示例答案。",
+      "rawMarkdown": "",
+      "images": [],
+      "warnings": []
+    },
+    {
+      "unitId": "example-short-answer-1",
+      "part": "示例部分",
+      "lecture": "第一讲 示例主题",
+      "lectureNumber": 1,
+      "type": "shortAnswer",
+      "number": 1,
+      "title": "示例简答题",
+      "promptMarkdown": "请列出两个示例要点。",
+      "answerMarkdown": "1. 示例要点一。\n2. 示例要点二。",
+      "rawMarkdown": "",
+      "images": [],
+      "warnings": []
+    }
+  ],
+  "warnings": [],
+  "rawSections": []
+}

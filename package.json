@@ -1,0 +1,25 @@
+{
+  "name": "kaoyan-study-console",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Local and Linux-server runnable study planning console.",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.js",
+    "import:manual45": "node import-manual45.js",
+    "migrate:v6": "node scripts/migrate-v6.js",
+    "migrate:v7": "node scripts/migrate-v7.js",
+    "migrate:v8": "node scripts/migrate-v8.js",
+    "migrate:v9": "node scripts/migrate-v9.js",
+    "migrate:v10": "node scripts/migrate-v10.js",
+    "migrate:v11": "node scripts/migrate-v11.js",
+    "migrate:v12": "node scripts/migrate-v12.js",
+    "migrate:routine-v2": "node scripts/migrate-routine-v2.js",
+    "migrate:routine-v3": "node scripts/migrate-routine-v3.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
+}
