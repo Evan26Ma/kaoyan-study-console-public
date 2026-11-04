@@ -1,0 +1,341 @@
+/* “答题卡”主题
+ *
+ * 视觉语言取自考研答题卡：白纸、红色印刷框线、四角黑色定位块，
+ * 完成的东西像用 2B 铅笔涂过一样变成石墨黑。
+ *
+ * 只在 <html data-theme="answer-sheet"> 时生效。
+ * 配色映射层 answer-sheet.remap.css 由脚本生成，本文件在它之后加载。 */
+
+html[data-theme="answer-sheet"] {
+  --as-paper: #FFFFFF;
+  --as-paper-tint: #F5F5F6;
+  --as-ink-red: #C21F30;
+  --as-ink-red-dark: #8E1422;
+  --as-rule: #EFB9BF;
+  --as-rule-soft: #F6DADD;
+  --as-red-tint: #FDF3F4;
+  --as-graphite: #24262B;
+  --as-serif: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+
+  --bg: var(--as-paper);
+  --surface: var(--as-paper);
+  --surface-soft: var(--as-paper-tint);
+  --ink: var(--as-graphite);
+  --muted: #5E6168;
+  --line: var(--as-rule);
+  --accent: var(--as-ink-red);
+  --accent-dark: var(--as-ink-red-dark);
+  --accent-bg: rgba(194, 31, 48, 0.06);
+  --green: var(--as-graphite);
+  --green-bg: #EDEDEF;
+  --amber: #A15C07;
+  --amber-bg: #FDF4E3;
+  --red: #B3172A;
+  --red-bg: var(--as-red-tint);
+  --shadow: none;
+  --shadow-sm: none;
+  --shadow-hover: none;
+  --radius-card: 2px;
+  --radius-btn: 2px;
+  --radius-sm: 2px;
+  accent-color: var(--as-graphite);
+}
+
+html[data-theme="answer-sheet"] body {
+  background: var(--as-paper);
+}
+
+/* 标题用宋体，像试卷 */
+html[data-theme="answer-sheet"] h1,
+html[data-theme="answer-sheet"] h2,
+html[data-theme="answer-sheet"] h3,
+html[data-theme="answer-sheet"] .topbar h2 {
+  font-family: var(--as-serif);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+html[data-theme="answer-sheet"] .view-kicker { display: none; }
+
+/* 侧栏 */
+html[data-theme="answer-sheet"] .sidebar {
+  background: var(--as-paper);
+  border-right: 1px solid var(--as-rule);
+}
+
+html[data-theme="answer-sheet"] .sidebar-brand h1 {
+  font-family: var(--as-serif);
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+html[data-theme="answer-sheet"] .sidebar-brand p {
+  color: var(--muted);
+}
+
+html[data-theme="answer-sheet"] .sidebar-label {
+  color: var(--as-ink-red);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html[data-theme="answer-sheet"] .nav-item {
+  color: var(--as-graphite);
+}
+
+html[data-theme="answer-sheet"] .nav-item:hover {
+  background: var(--as-paper-tint);
+}
+
+html[data-theme="answer-sheet"] .nav-item[aria-selected="true"] {
+  background: var(--as-paper-tint);
+  color: var(--as-graphite);
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 var(--as-graphite);
+}
+
+html[data-theme="answer-sheet"] .nav-icon,
+html[data-theme="answer-sheet"] .nav-item[aria-selected="true"] .nav-icon {
+  background: transparent;
+  color: inherit;
+}
+
+html[data-theme="answer-sheet"] .sidebar .tab-count,
+html[data-theme="answer-sheet"] .nav-item[aria-selected="true"] .tab-count {
+  background: transparent;
+  color: var(--muted);
+}
+
+/* 顶栏 */
+html[data-theme="answer-sheet"] .topbar {
+  background: var(--as-paper);
+  border-bottom: 1px solid var(--as-rule);
+}
+
+/* 内容区：红色外框 + 四角定位块，画在两侧留白里，不影响排版 */
+html[data-theme="answer-sheet"] .content-shell {
+  position: relative;
+}
+
+html[data-theme="answer-sheet"] .content-shell::before,
+html[data-theme="answer-sheet"] .content-shell::after {
+  content: "";
+  position: absolute;
+  inset: 10px -14px 10px -14px;
+  pointer-events: none;
+}
+
+html[data-theme="answer-sheet"] .content-shell::before {
+  border: 1.5px solid var(--as-ink-red);
+}
+
+html[data-theme="answer-sheet"] .content-shell::after {
+  inset: 3px -21px 3px -21px;
+  background:
+    linear-gradient(var(--as-graphite), var(--as-graphite)) left top / 14px 14px no-repeat,
+    linear-gradient(var(--as-graphite), var(--as-graphite)) right top / 14px 14px no-repeat,
+    linear-gradient(var(--as-graphite), var(--as-graphite)) left bottom / 14px 14px no-repeat,
+    linear-gradient(var(--as-graphite), var(--as-graphite)) right bottom / 14px 14px no-repeat;
+}
+
+/* 按钮：主按钮是石墨黑，次按钮是红色印刷框 */
+html[data-theme="answer-sheet"] .primary-btn {
+  background: var(--as-graphite);
+  border-color: var(--as-graphite);
+  color: #FFFFFF;
+}
+
+html[data-theme="answer-sheet"] .primary-btn:hover {
+  background: #000000;
+}
+
+html[data-theme="answer-sheet"] .secondary-btn {
+  background: var(--as-paper);
+  border: 1.5px solid var(--as-ink-red);
+  color: var(--as-ink-red);
+}
+
+html[data-theme="answer-sheet"] .secondary-btn:hover {
+  background: var(--as-red-tint);
+  color: var(--as-ink-red-dark);
+  border-color: var(--as-ink-red-dark);
+}
+
+html[data-theme="answer-sheet"] .ghost-btn:hover {
+  background: var(--as-paper-tint);
+}
+
+html[data-theme="answer-sheet"] .danger-btn {
+  border: 1.5px solid var(--red);
+}
+
+html[data-theme="answer-sheet"] .tab {
+  border-color: var(--as-rule);
+}
+
+html[data-theme="answer-sheet"] .tab[aria-selected="true"] {
+  background: var(--as-graphite);
+  border-color: var(--as-graphite);
+}
+
+html[data-theme="answer-sheet"] .tab:not([aria-selected="true"]) .tab-count {
+  background: transparent;
+  color: var(--as-ink-red);
+}
+
+/* 卡片：去掉浮起效果，统一红线框 */
+html[data-theme="answer-sheet"] .metric:hover,
+html[data-theme="answer-sheet"] .panel:hover {
+  transform: none;
+}
+
+html[data-theme="answer-sheet"] .metric span {
+  color: var(--as-ink-red);
+  letter-spacing: 0;
+}
+
+/* 去掉装饰性的彩色色块，图标改成红色印刷色 */
+html[data-theme="answer-sheet"] .reading-overview-kpi::after { display: none; }
+
+html[data-theme="answer-sheet"] .reading-overview-kpi-icon {
+  background: transparent;
+  color: var(--as-ink-red);
+}
+
+html[data-theme="answer-sheet"] .daily-ai-panel {
+  background: var(--as-paper);
+  border: 1.5px solid var(--as-ink-red);
+}
+
+html[data-theme="answer-sheet"] .daily-ai-title > span {
+  background: var(--as-graphite);
+}
+
+/* 进度条：像一格一格涂黑 */
+html[data-theme="answer-sheet"] .progress-track {
+  height: 10px;
+  background: var(--as-paper);
+  border: 1px solid var(--as-rule);
+  border-radius: 5px;
+}
+
+html[data-theme="answer-sheet"] .progress-bar {
+  background: var(--as-graphite);
+}
+
+/* 图表库没加载时的进度环兜底 */
+html[data-theme="answer-sheet"] .hero-ring-wrap {
+  background: conic-gradient(var(--as-graphite) var(--hero-progress), var(--as-rule-soft) 0);
+}
+
+/* 复选框：答题卡上的填涂框，勾选即涂黑 */
+html[data-theme="answer-sheet"] input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: none;
+  display: inline-block;
+  width: 26px;
+  height: 12px;
+  margin: 0;
+  border: 1.5px solid var(--as-ink-red);
+  border-radius: 6px;
+  background: var(--as-paper);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+html[data-theme="answer-sheet"] input[type="checkbox"]:checked {
+  background: var(--as-graphite);
+  border-color: var(--as-graphite);
+}
+
+html[data-theme="answer-sheet"] input[type="checkbox"]:disabled {
+  border-color: var(--as-rule);
+}
+
+/* 表单 */
+html[data-theme="answer-sheet"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-theme="answer-sheet"] select,
+html[data-theme="answer-sheet"] textarea {
+  border-color: var(--as-rule);
+  border-radius: 2px;
+}
+
+html[data-theme="answer-sheet"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+html[data-theme="answer-sheet"] select:focus,
+html[data-theme="answer-sheet"] textarea:focus {
+  border-color: var(--as-graphite);
+}
+
+html[data-theme="answer-sheet"] a:focus-visible,
+html[data-theme="answer-sheet"] button:focus-visible,
+html[data-theme="answer-sheet"] input:focus-visible,
+html[data-theme="answer-sheet"] select:focus-visible,
+html[data-theme="answer-sheet"] textarea:focus-visible {
+  outline: 2px solid var(--as-ink-red);
+  outline-offset: 2px;
+}
+
+/* 外观设置里的主题选项 */
+.theme-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 16px 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.theme-option[aria-pressed="true"] {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+  font-weight: 700;
+}
+
+.theme-swatch {
+  width: 40px;
+  height: 28px;
+  flex: none;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.theme-swatch-default {
+  background: linear-gradient(135deg, #F7F8FA 50%, #5B6CFF 50%);
+}
+
+.theme-swatch-answer-sheet {
+  border-radius: 0;
+  border: 1.5px solid #C21F30;
+  background:
+    linear-gradient(#24262B, #24262B) 6px 50% / 14px 6px no-repeat,
+    #FFFFFF;
+}
+
+@media (max-width: 940px) {
+  html[data-theme="answer-sheet"] .content-shell::before,
+  html[data-theme="answer-sheet"] .content-shell::after {
+    display: none;
+  }
+
+  /* 窄屏时侧栏变成底部标签栏，选中标记改到上沿 */
+  html[data-theme="answer-sheet"] .nav-item[aria-selected="true"] {
+    box-shadow: inset 0 3px 0 var(--as-graphite);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="answer-sheet"] .progress-bar { transition: none; }
+}

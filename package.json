@@ -8,6 +8,7 @@
     "start": "node server.js",
     "test": "node --test test/*.test.js",
     "import:manual45": "node import-manual45.js",
+    "build:theme": "node scripts/build-answer-sheet-theme.js",
     "migrate:v6": "node scripts/migrate-v6.js",
     "migrate:v7": "node scripts/migrate-v7.js",
     "migrate:v8": "node scripts/migrate-v8.js",
