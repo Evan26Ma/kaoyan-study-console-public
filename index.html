@@ -5,7 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem("recitePlanner.theme");
+        if (theme === "answer-sheet") document.documentElement.setAttribute("data-theme", theme);
+      } catch (error) {}
+    }());
+  </script>
   <script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js" async></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" async></script>
   <script src="english-reading-core.js"></script>
@@ -5905,6 +5913,8 @@
     }
   </style>
   <link rel="stylesheet" href="manual45-reader.css?v=20260910-reader-layout">
+  <link rel="stylesheet" href="themes/answer-sheet.remap.css?v=20261104-theme">
+  <link rel="stylesheet" href="themes/answer-sheet.css?v=20261104-theme">
 </head>
 <body>
   <div class="app-shell">
@@ -6786,6 +6796,33 @@
       ["data", "数据与备份", "database-backup"],
       ["system", "系统与访问", "server-cog"]
     ];
+    const THEME_STORAGE_KEY = "recitePlanner.theme";
+    const THEMES = [
+      ["default", "默认", "清爽的浅色界面"],
+      ["answer-sheet", "答题卡", "红色印刷框线，完成即涂黑"]
+    ];
+
+    function currentTheme() {
+      return document.documentElement.getAttribute("data-theme") || "default";
+    }
+
+    function applyTheme(themeId) {
+      const theme = THEMES.some(([id]) => id === themeId) ? themeId : "default";
+      if (theme === "default") document.documentElement.removeAttribute("data-theme");
+      else document.documentElement.setAttribute("data-theme", theme);
+      try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch (error) {}
+      document.dispatchEvent(new CustomEvent("themechange", { detail: { theme } }));
+    }
+
+    function settingsAppearanceHtml() {
+      const active = currentTheme();
+      return `<section class="settings-section"><div class="settings-section-head"><div><h3>外观</h3><p>主题只保存在当前浏览器，不影响其他设备。</p></div></div>
+        <div class="settings-section-body"><div class="theme-options" role="group" aria-label="主题">${THEMES.map(([id, label, copy]) => `
+          <button class="theme-option" type="button" data-action="set-theme" data-theme-id="${id}" aria-pressed="${active === id}">
+            <span class="theme-swatch theme-swatch-${id}" aria-hidden="true"></span><span><strong>${label}</strong><br><small class="muted">${copy}</small></span>
+          </button>`).join("")}</div></div>
+      </section>`;
+    }
 
     const FORM_DRAFT_FIELDS = {
       ai: ["aiModeField", "aiToneField", "aiTextField"],
@@ -7131,6 +7168,11 @@
       if (action === "focus-access-token") {
         elements.accessTokenInput.hidden = false;
         elements.accessTokenInput.focus();
+        return;
+      }
+      if (action === "set-theme") {
+        applyTheme(actionTarget.dataset.themeId);
+        renderSettingsView();
         return;
       }
       if (WRITE_ACTIONS.has(action) && !ensureWriteAccess()) return;
@@ -14852,6 +14894,7 @@
           <button class="settings-status-card" type="button" data-action="set-settings-section" data-settings-section="${id}">
             <span class="settings-card-icon"><i data-lucide="${icon}" aria-hidden="true"></i></span><span><strong>${title}</strong><span>${escapeHtml(copy)}</span></span><i data-lucide="chevron-right" aria-hidden="true"></i>
           </button>`).join("")}</div>
+        ${settingsAppearanceHtml()}
       </div>`;
     }
 
@@ -20112,10 +20155,21 @@
               if (canvas) canvas.setAttribute("aria-label", restDay ? "今日为休息日，不计算完成进度" : `今日任务总完成进度 ${numericValue}%`);
               if (chart) {
                 chart.data.datasets[0].data = [numericValue, Math.max(0, 100 - numericValue)];
-                chart.data.datasets[0].backgroundColor[0] = numericValue >= 80 ? "#22C55E" : "#5B6CFF";
+                const ringColors = progressRingColors();
+                chart.data.datasets[0].backgroundColor[0] = numericValue >= 80 ? ringColors.high : ringColors.fill;
+                chart.data.datasets[0].backgroundColor[1] = ringColors.track;
             chart.update("none");
           }
         }
+
+        function progressRingColors() {
+          if (document.documentElement.getAttribute("data-theme") === "answer-sheet") {
+            return { fill: "#24262B", high: "#24262B", track: "#F6DADD" };
+          }
+          return { fill: "#5B6CFF", high: "#22C55E", track: "rgba(91, 108, 255, 0.1)" };
+        }
+
+        document.addEventListener("themechange", renderProgress);
 
         function initializeChart(attemptsLeft) {
           if (chart || !canvas) return;
