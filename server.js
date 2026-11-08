@@ -919,6 +919,7 @@ module.exports = {
   server,
   hasReadAccess,
   redactPrivateState,
+  preserveRedactedPrivateState,
   normalizeManual45ContentState,
   normalizeAdjustmentExplanationResults,
   normalizeReadingSelectionRequest,
@@ -3333,6 +3334,7 @@ function redactPrivateState(value) {
     delete profile.capacityOverrides;
     delete profile.restDays;
     delete profile.durationDefaults;
+    delete profile.examPlan;
   }
   return {
     version: value.version,
@@ -3661,6 +3663,12 @@ function preserveServerOwnedState(existingState, incomingState, allowManual45Upd
   };
 }
 
+// 目标院校与模考成绩（profile.examPlan）和目标院校一样属于隐私数据。
+function hasExamPlanData(examPlan) {
+  return Boolean(examPlan && typeof examPlan === "object"
+    && ((Array.isArray(examPlan.schools) && examPlan.schools.length) || (Array.isArray(examPlan.mocks) && examPlan.mocks.length)));
+}
+
 function preserveRedactedPrivateState(existingState, incomingState, privateStateLoaded) {
   if (privateStateLoaded || !existingState || !incomingState || typeof incomingState !== "object") return incomingState;
 
@@ -3668,6 +3676,7 @@ function preserveRedactedPrivateState(existingState, incomingState, privateState
   const incomingProfile = incomingState.profile && typeof incomingState.profile === "object" ? incomingState.profile : {};
   const existingHasPrivateState = Boolean(
     existingProfile.targetSchool || existingProfile.targetMajor || existingProfile.examDate
+    || hasExamPlanData(existingProfile.examPlan)
     || Object.keys(existingProfile.capacityOverrides || {}).length
     || Object.keys(existingProfile.restDays || {}).length
     || (Array.isArray(existingState.plans) && existingState.plans.length)
@@ -3681,6 +3690,7 @@ function preserveRedactedPrivateState(existingState, incomingState, privateState
     (existingProfile.targetSchool && !incomingProfile.targetSchool)
     || (existingProfile.targetMajor && !incomingProfile.targetMajor)
     || (existingProfile.examDate && !incomingProfile.examDate)
+    || (hasExamPlanData(existingProfile.examPlan) && !hasExamPlanData(incomingProfile.examPlan))
     || (Object.keys(existingProfile.capacityOverrides || {}).length && !Object.keys(incomingProfile.capacityOverrides || {}).length)
     || (Object.keys(existingProfile.restDays || {}).length && !Object.keys(incomingProfile.restDays || {}).length)
     || (Array.isArray(existingState.plans) && existingState.plans.length && Array.isArray(incomingState.plans) && !incomingState.plans.length)
@@ -3691,6 +3701,7 @@ function preserveRedactedPrivateState(existingState, incomingState, privateState
   if (!incomingLooksRedacted) return incomingState;
 
   const profile = { ...incomingProfile };
+  if (hasExamPlanData(existingProfile.examPlan) && !hasExamPlanData(incomingProfile.examPlan)) profile.examPlan = existingProfile.examPlan;
   ["targetSchool", "targetMajor", "examDate", "capacityOverrides", "restDays", "durationDefaults"].forEach((key) => {
     const existingValue = existingProfile[key];
     const incomingValue = incomingProfile[key];
