@@ -22,6 +22,7 @@ test("profile normalization is backward compatible and rest metadata forces zero
     const isDateKey = value => /^\\d{4}-\\d{2}-\\d{2}$/.test(value || "");
     const cleanText = (value, fallback) => typeof value === "string" && value.trim() ? value.trim() : fallback;
     const clampNumber = (value, min, max, fallback) => Number.isFinite(Number(value)) ? Math.min(max, Math.max(min, Math.round(Number(value)))) : fallback;
+    const normalizeExamPlan = (value) => value || {};
     ${source}
     return normalizeProfile;
   `)();

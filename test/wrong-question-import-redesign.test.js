@@ -147,9 +147,9 @@ test("top workspace follows the reference proportions and compact field grouping
   assert.match(html, /id="wrongImportEstimate"/);
 });
 
-test("secondary import actions use purple theme states while danger remains red", () => {
-  assert.match(html, /\.wrong-import-page \.secondary-btn,[\s\S]*?border: 1px solid #cfc7fb;[\s\S]*?background: #f5f2ff;[\s\S]*?color: #4d3fb3/);
-  assert.match(html, /\.wrong-import-page \.secondary-btn:hover,[\s\S]*?background: #ede9fe/);
+test("secondary import actions use accent theme states while danger remains red", () => {
+  assert.match(html, /\.wrong-import-page \.secondary-btn,[\s\S]*?border: 1px solid #cddaf5;[\s\S]*?background: #f5f7fc;[\s\S]*?color: #2f4c86/);
+  assert.match(html, /\.wrong-import-page \.secondary-btn:hover,[\s\S]*?background: #ecf1fb/);
   assert.match(html, /\.wrong-import-page \.secondary-btn:disabled,[\s\S]*?cursor: not-allowed/);
   assert.match(html, /\.wrong-import-primary:focus-visible[\s\S]*?outline: 3px solid/);
   assert.match(html, /\.wrong-import-page \.danger-btn \{[^}]*color: #b91c1c/);
